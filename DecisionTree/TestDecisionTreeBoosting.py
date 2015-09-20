@@ -31,7 +31,7 @@ class DecisionTreeTest(unittest.TestCase):
             train_x, train_y = x[train], y[train]
             test_x, test_y = x[test], y[test]
 
-            ensemble = GradientTreeBoosting(count_steps=20, max_tree_depth=10, min_branch_size=0.1, b_coef=0.99)
+            ensemble = GradientTreeBoosting(count_steps=100, max_tree_depth=20, min_branch_size=0.15, b_coef=0.90)
             ensemble.fit(train_x, train_y)
 
             sktree = sklearn_trees.DecisionTreeRegressor()
