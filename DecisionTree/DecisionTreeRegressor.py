@@ -88,6 +88,11 @@ class DecisionTreeRegressor():
                         ((sum_y - sum_left[elem_id]) / (current_actual_set_size - elem_id)) ** 2
                     )
 
+                #y1 = np.array([y[sort_order[i][feature_id]] for i in range(0, elem_id)])
+                #y2 = np.array([y[sort_order[i][feature_id]] for i in range(elem_id, current_actual_set_size)])
+
+                #assert (abs(current_variance - y1.var() - y2.var()) < 1e-5)
+
                 if x[sort_order[elem_id - 1][feature_id]][feature_id] != x[sort_order[elem_id][feature_id]][feature_id]\
                         and current_variance < optimal_variance \
                         and current_actual_set_size * self.min_branch_size < elem_id < current_actual_set_size * (
