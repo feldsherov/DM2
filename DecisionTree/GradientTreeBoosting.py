@@ -8,11 +8,10 @@ __author__ = 'feldsherov'
 
 
 class GradientTreeBoosting:
-    def __init__(self, count_steps=400, b_coef=0.95, max_tree_depth=10, min_branch_size=0.2):
+    def __init__(self, count_steps=400, b_coef=0.95, max_tree_depth=10):
         self.count_steps = count_steps
         self.b_coef = b_coef
         self.max_tree_depth = max_tree_depth
-        self.min_branch_size = min_branch_size
         self.coefficients = None
         self.models = None
 
@@ -22,7 +21,7 @@ class GradientTreeBoosting:
 
 
         models, coefficients = list(), list()
-        models.append(DecisionTreeRegressor(max_depth=self.max_tree_depth, min_branch_size=self.min_branch_size))
+        models.append(DecisionTreeRegressor(max_depth=self.max_tree_depth))
         models[-1].fit(x, y)
         coefficients.append(1)
 
@@ -30,11 +29,11 @@ class GradientTreeBoosting:
 
         for i in range(self.count_steps):
             antigrad = 2*(y - current_model_predictions)
-            models.append(DecisionTreeRegressor(max_depth=self.max_tree_depth, min_branch_size=self.min_branch_size))
+            models.append(DecisionTreeRegressor(max_depth=self.max_tree_depth))
             models[-1].fit(x, antigrad)
             coefficients.append(coefficients[-1] * self.b_coef)
-            coefficients[-1] *= self.__get_optimal_coef(y, current_model_predictions,
-                                                        coefficients[-1], models[-1].predict(x))
+            #coefficients[-1] *= self.__get_optimal_coef(y, current_model_predictions,
+            #                                            coefficients[-1], models[-1].predict(x))
 
             current_model_predictions += coefficients[-1] * models[-1].predict(x)
 
@@ -43,7 +42,8 @@ class GradientTreeBoosting:
         self.models = models
         self.coefficients = coefficients
 
-    def __get_optimal_coef(self, y, current_model_predictions, coef, current_week_predictions):
+    @staticmethod
+    def __get_optimal_coef(y, current_model_predictions, coef, current_week_predictions):
         optimal = 1
         loss = float("inf")
 
@@ -95,7 +95,7 @@ class GradientTreeBoostingViaSklearnTree:
 
             current_model_predictions += coefficients[-1] * models[-1].predict(x)
 
-            print >>sys.stderr, mean_squared_error(current_model_predictions, y)
+            #print >>sys.stderr, mean_squared_error(current_model_predictions, y)
 
         self.models = models
         self.coefficients = coefficients

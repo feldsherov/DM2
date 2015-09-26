@@ -11,14 +11,13 @@ class DecisionTreeRegressor():
         def __init__(self):
             pass
 
-    def __init__(self, max_depth=10, min_list_size=2, min_list_variance=1e-2, min_branch_size=0.3):
+    def __init__(self, max_depth=10, min_list_size=2, min_list_variance=1e-2):
         self.max_depth = max_depth
         self.min_list_size = min_list_size
         self.root = None
         self.count_features = None
         self.train_set_size = None
         self.min_list_variance = min_list_variance
-        self.min_branch_size = min_branch_size
 
     def __train_tree(self, root, x, y, curr_depth=0):
         variance = y.var()
@@ -79,11 +78,11 @@ class DecisionTreeRegressor():
                                         y[sort_order[elem_id - 1][feature_id]] ** 2
 
                 current_variance = \
-                    (
+                    elem_id * (
                         sum_sq_left[elem_id] / elem_id -
                         (sum_left[elem_id] / elem_id) ** 2
                     ) + \
-                    (
+                    (current_actual_set_size - elem_id) * (
                         (sum_sq_y - sum_sq_left[elem_id]) / (current_actual_set_size - elem_id) -
                         ((sum_y - sum_left[elem_id]) / (current_actual_set_size - elem_id)) ** 2
                     )
@@ -94,9 +93,7 @@ class DecisionTreeRegressor():
                 #assert (abs(current_variance - y1.var() - y2.var()) < 1e-5)
 
                 if x[sort_order[elem_id - 1][feature_id]][feature_id] != x[sort_order[elem_id][feature_id]][feature_id]\
-                        and current_variance < optimal_variance \
-                        and current_actual_set_size * self.min_branch_size < elem_id < current_actual_set_size * (
-                            1 - self.min_branch_size):
+                        and current_variance < optimal_variance:
                     optimal_feature_id, optimal_elem_id, optimal_variance = feature_id, elem_id, current_variance
 
         return (optimal_feature_id,

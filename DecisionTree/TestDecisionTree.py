@@ -44,7 +44,7 @@ class DecisionTreeTest(unittest.TestCase):
             train_x, train_y = x[train], y[train]
             test_x, test_y = x[test], y[test]
 
-            tree = DecisionTreeRegressor(max_depth=50, min_list_size=2, min_list_variance=1e-5, min_branch_size=0.2)
+            tree = DecisionTreeRegressor(max_depth=50, min_list_size=2, min_list_variance=1e-5)
             tree.fit(train_x, train_y)
 
             sktree = sklearn_trees.DecisionTreeRegressor()
