@@ -8,7 +8,7 @@ __author__ = 'feldsherov'
 
 
 class GradientTreeBoosting:
-    def __init__(self, count_steps=400, b_coef=1e-2, max_tree_depth=10):
+    def __init__(self, count_steps=200, b_coef=1e-2, max_tree_depth=8):
         self.count_steps = count_steps
         self.b_coef = b_coef
         self.max_tree_depth = max_tree_depth
