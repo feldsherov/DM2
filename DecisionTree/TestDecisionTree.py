@@ -9,16 +9,26 @@ from sklearn import tree as sklearn_trees
 
 from DecisionTreeRegressor import DecisionTreeRegressor
 
-__author__ = 'feldsherov'
+__author__ = 'Svyatoslav Feldsherov'
 
 
 class DecisionTreeTest(unittest.TestCase):
+    """
+    Unit test class fo testing DecisionTreeRegressor
+    """
+
+    # paths to DataSets
     TestDataPath = "../DataSets/test.data.txt"
     HousingDataPath = "../DataSets/housing.data.txt"
     AutoDataPath = "../DataSets/auto-mpg.data.txt"
     SPAMDataPath = "../DataSets/spam.train.txt"
 
     def test_on_test_dataset(self):
+        """
+        Test on test data set
+        Logging results
+        :return: None
+        """
         log = logging.getLogger("DecisionTreeTest.test_on_test_dataset")
         tree = DecisionTreeRegressor()
         data = np.loadtxt(DecisionTreeTest.TestDataPath)
@@ -33,6 +43,11 @@ class DecisionTreeTest(unittest.TestCase):
         self.assertTrue(np.array_equal(prediction, y))
 
     def test_on_housing_dataset(self):
+        """
+        Test on housing data set
+        Logging results
+        :return: None
+        """
         log = logging.getLogger("DecisionTreeTest.test_on_housing_dataset")
         data = np.loadtxt(DecisionTreeTest.HousingDataPath)
 

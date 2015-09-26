@@ -4,25 +4,40 @@ from sklearn.metrics import mean_squared_error
 from sklearn.tree import  DecisionTreeRegressor as SklearnDecisionTreeRegressor
 
 from DecisionTreeRegressor import DecisionTreeRegressor
-__author__ = 'feldsherov'
+
+__author__ = 'Svyatoslav Feldsherov'
 
 
 class GradientTreeBoosting:
-    def __init__(self, count_steps=200, b_coef=1e-2, max_tree_depth=8):
+    """
+    Implements gradient boosting of decision trees
+    """
+    def __init__(self, count_steps=200, step=1e-2, max_tree_depth=8):
+        """
+        :param count_steps: count of steps in boosting (count of trees)
+        :param step: multiplier for model prediction in model
+        :param max_tree_depth: max depth of any tree in ensemble
+        :return None:
+        """
         self.count_steps = count_steps
-        self.b_coef = b_coef
+        self.step = step
         self.max_tree_depth = max_tree_depth
         self.coefficients = None
         self.models = None
 
     def fit(self, x, y):
+        """
+        :param x: 2D array of features, x[object][feature]
+        :param y: target variable
+        :return:
+        """
         x = np.array(x)
         y = np.array(y)
 
         models, coefficients = list(), list()
         models.append(DecisionTreeRegressor(max_depth=self.max_tree_depth))
         models[-1].fit(x, y)
-        coefficients.append(1e-3)
+        coefficients.append(self.step)
 
         current_model_predictions = coefficients[-1] * models[-1].predict(x)
 
@@ -30,18 +45,20 @@ class GradientTreeBoosting:
             antigrad = 2*(y - current_model_predictions)
             models.append(DecisionTreeRegressor(max_depth=self.max_tree_depth))
             models[-1].fit(x, antigrad)
-            coefficients.append(self.b_coef)
+            coefficients.append(self.step)
 
             current_model_predictions += coefficients[-1] * models[-1].predict(x)
 
-            #print >>sys.stderr, antigrad
-            print >>sys.stderr, mean_squared_error(current_model_predictions, y), i
+            print >>sys.stderr, "Step: %d, mean squared error: %f" % (i, mean_squared_error(current_model_predictions, y))
 
         self.models = models
         self.coefficients = coefficients
 
-
     def predict(self, x):
+        """
+        :param x: 2D array of features x[object][feature]
+        :return: array -- predicted values (len(y) == x.shape[1] )
+        """
         x = np.array(x)
         predictions = np.zeros(x.shape[0])
         for i, tree in enumerate(self.models):
@@ -51,23 +68,35 @@ class GradientTreeBoosting:
 
 
 class GradientTreeBoostingViaSklearnTree:
-    def __init__(self, count_steps=400, b_coef=1e-3, max_tree_depth=10, min_branch_size=0.2):
+    """
+    Implements gradient boosting of decision trees
+    """
+    def __init__(self, count_steps=200, step=1e-2, max_tree_depth=8):
+        """
+        :param count_steps: count of steps in boosting (count of trees)
+        :param step: multiplier for model prediction in model
+        :param max_tree_depth: max depth of any tree in ensemble
+        :return None:
+        """
         self.count_steps = count_steps
-        self.b_coef = b_coef
+        self.step = step
         self.max_tree_depth = max_tree_depth
-        self.min_branch_size = min_branch_size
         self.coefficients = None
         self.models = None
 
     def fit(self, x, y):
+        """
+        :param x: 2D array of features, x[object][feature]
+        :param y: target variable
+        :return:
+        """
         x = np.array(x)
         y = np.array(y)
-
 
         models, coefficients = list(), list()
         models.append(SklearnDecisionTreeRegressor(max_depth=self.max_tree_depth))
         models[-1].fit(x, y)
-        coefficients.append(1e-3)
+        coefficients.append(self.step)
 
         current_model_predictions = coefficients[-1] * models[-1].predict(x)
 
@@ -75,16 +104,20 @@ class GradientTreeBoostingViaSklearnTree:
             antigrad = 2*(y - current_model_predictions)
             models.append(SklearnDecisionTreeRegressor(max_depth=self.max_tree_depth))
             models[-1].fit(x, antigrad)
-            coefficients.append(self.b_coef)
+            coefficients.append(self.step)
 
             current_model_predictions += coefficients[-1] * models[-1].predict(x)
 
-            #print >>sys.stderr, mean_squared_error(current_model_predictions, y)
+            print >>sys.stderr, "Step: %d, mean squared error: %f" % (i, mean_squared_error(current_model_predictions, y))
 
         self.models = models
         self.coefficients = coefficients
 
     def predict(self, x):
+        """
+        :param x: 2D array of features x[object][feature]
+        :return:
+        """
         x = np.array(x)
         predictions = np.zeros(x.shape[0])
         for i, tree in enumerate(self.models):

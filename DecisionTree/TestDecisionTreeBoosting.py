@@ -9,18 +9,26 @@ from sklearn import tree as sklearn_trees
 from sklearn.ensemble import GradientBoostingRegressor
 
 from GradientTreeBoosting import GradientTreeBoosting, GradientTreeBoostingViaSklearnTree
-#from DecisionTreeRegressor import DecisionTreeRegressor
 
-__author__ = 'feldsherov'
+
+__author__ = 'Svyatoslav Feldsherov'
 
 
 class DecisionTreeTest(unittest.TestCase):
+    """
+    Unit test class for GradientTreeBoosting testing
+    """
     TestDataPath = "../DataSets/test.data.txt"
     HousingDataPath = "../DataSets/housing.data.txt"
     AutoDataPath = "../DataSets/auto-mpg.data.txt"
     SPAMDataPath = "../DataSets/spam.train.txt"
 
     def test_on_housing_dataset(self):
+        """
+        Test on housing data set
+        Logging result and MSE for some different models
+        :return: None
+        """
         log = logging.getLogger("GradientTreeBoosting.test_on_housing_dataset")
         data = np.loadtxt(DecisionTreeTest.HousingDataPath)
 
@@ -32,10 +40,10 @@ class DecisionTreeTest(unittest.TestCase):
             train_x, train_y = x[train], y[train]
             test_x, test_y = x[test], y[test]
 
-            ensemble = GradientTreeBoosting(count_steps=200, max_tree_depth=8, b_coef=1e-2)
+            ensemble = GradientTreeBoosting(count_steps=200, step=1e-2, max_tree_depth=8)
             ensemble.fit(train_x, train_y)
 
-            ensemble_with_sktree = GradientTreeBoostingViaSklearnTree(count_steps=200, max_tree_depth=8, b_coef=1e-1)
+            ensemble_with_sktree = GradientTreeBoostingViaSklearnTree(count_steps=200, max_tree_depth=8, step=1e-2)
             ensemble_with_sktree.fit(train_x, train_y)
 
             sktree = sklearn_trees.DecisionTreeRegressor()
