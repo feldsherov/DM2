@@ -47,7 +47,7 @@ class DecisionTreeRegressor():
             return
 
         # finding optimal split
-        feature_id, predicate, border_value = self.__get_optimal_split(x, y)
+        feature_id, predicate = self.__get_optimal_split(x, y)
 
         # initialization of current node
         root.left = DecisionTreeRegressor.DecisionTreeNode()
@@ -82,6 +82,40 @@ class DecisionTreeRegressor():
         """
         x = np.array(x)
         return np.array([self.__get_one_prediction(self.root, elem) for elem in x])
+
+    def get_features_profit(self, x, y):
+        profit = np.zeros(y.size())
+        self.__get_feature_profit_by_node(x, y, profit)
+        return profit
+
+
+    def __get_feature_profit_by_node(self, root, x, y, profit):
+        """
+        recursive function for calculating profit
+        :param root: the root of current subtree
+        :param x: 2D array of features x[object][feature]
+        :param y: target variable
+        :param profit: 1D array for output
+        :return:
+        """
+
+        # check for current node is list
+        if "left" not in root.__dict__ and "right" not in root.__dict__:
+            return root.list_result
+
+        predicate = root.predicate
+        feature_id = root.feature_id
+        actual_objects_left = np.array([predicate(el) for el in x[::, feature_id]])
+
+        actual_left = y[actual_objects_left]
+        actual_right = y[-actual_objects_left]
+
+        profit[feature_id] += y.var() / y.size() -\
+                              actual_left.var() / actual_left.size() - actual_right.var() / actual_right.size()
+
+        self.__get_feature_profit_by_node(root.left, x[actual_objects_left], actual_left, profit)
+        self.__get_feature_profit_by_node(root.right, x[-actual_objects_left], actual_right, profit)
+
 
     def __get_one_prediction(self, root, elem):
         """
