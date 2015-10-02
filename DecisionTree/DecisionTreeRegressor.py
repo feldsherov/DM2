@@ -195,7 +195,7 @@ class DecisionTreeRegressor():
                     optimal_feature_id, optimal_elem_id, loss = feature_id, elem_id, current_variance
 
         pred_split_val = x[sort_order[optimal_elem_id - 1][optimal_feature_id]][optimal_feature_id]
-        next_split_val = x[sort_order[optimal_elem_id + 1][optimal_feature_id]][optimal_feature_id]
+        next_split_val = x[sort_order[optimal_elem_id][optimal_feature_id]][optimal_feature_id]
         act_split_val = (pred_split_val + next_split_val) / 2
         return (optimal_feature_id,
                 lambda a: a <= act_split_val,
