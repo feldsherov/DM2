@@ -12,7 +12,7 @@ class GradientTreeBoosting:
     """
     Implements gradient boosting of decision trees
     """
-    def __init__(self, count_steps=200, step=1e-2, max_tree_depth=8):
+    def __init__(self, count_steps=200, step=1e-2, max_tree_depth=3, debug=False):
         """
         :param count_steps: count of steps in boosting (count of trees)
         :param step: multiplier for model prediction in model
@@ -24,6 +24,13 @@ class GradientTreeBoosting:
         self.max_tree_depth = max_tree_depth
         self.coefficients = None
         self.models = None
+        self.debug = debug
+
+    def get_features_profit(self, x, y):
+        feature_profit = np.zeros(x.shape[1])
+        for coef, tree in zip(self.coefficients, self.models):
+            feature_profit += coef * tree.get_features_profit(x, y)
+        return feature_profit
 
     def fit(self, x, y):
         """
@@ -40,7 +47,8 @@ class GradientTreeBoosting:
         coefficients.append(self.step)
 
         current_model_predictions = coefficients[-1] * models[-1].predict(x)
-        print >>sys.stderr, "My tree step: %d, mean squared error: %f" % (0, mean_squared_error(current_model_predictions, y))
+        if self.debug:
+            print >>sys.stderr, "My tree step: %d, mean squared error: %f" % (0, mean_squared_error(current_model_predictions, y))
 
         for i in range(1, self.count_steps):
             antigrad = 2*(y - current_model_predictions)
@@ -49,9 +57,9 @@ class GradientTreeBoosting:
             coefficients.append(self.step)
 
             current_model_predictions += coefficients[-1] * models[-1].predict(x)
-
-            print >>sys.stderr, "My tree step: %d, mean squared error: %f" % (i, mean_squared_error(current_model_predictions, y))
-            # print >>sys.stderr, current_model_predictions
+            if self.debug:
+                print >>sys.stderr, "My tree step: %d, mean squared error: %f" % (i, mean_squared_error(current_model_predictions, y))
+                # print >>sys.stderr, current_model_predictions
 
         self.models = models
         self.coefficients = coefficients
@@ -73,7 +81,7 @@ class GradientTreeBoostingViaSklearnTree:
     """
     Implements gradient boosting of decision trees
     """
-    def __init__(self, count_steps=200, step=1e-2, max_tree_depth=8):
+    def __init__(self, count_steps=200, step=1e-2, max_tree_depth=3, debug=False):
         """
         :param count_steps: count of steps in boosting (count of trees)
         :param step: multiplier for model prediction in model
@@ -85,6 +93,7 @@ class GradientTreeBoostingViaSklearnTree:
         self.max_tree_depth = max_tree_depth
         self.coefficients = None
         self.models = None
+        self.debug = debug
 
     def fit(self, x, y):
         """
@@ -101,7 +110,8 @@ class GradientTreeBoostingViaSklearnTree:
         coefficients.append(self.step)
 
         current_model_predictions = coefficients[-1] * models[-1].predict(x)
-        print >>sys.stderr, "Sklearn tree step: %d, mean squared error: %f" % (0, mean_squared_error(current_model_predictions, y))
+        if self.debug:
+            print >>sys.stderr, "Sklearn tree step: %d, mean squared error: %f" % (0, mean_squared_error(current_model_predictions, y))
 
         for i in range(1, self.count_steps):
             antigrad = 2*(y - current_model_predictions)
@@ -111,8 +121,9 @@ class GradientTreeBoostingViaSklearnTree:
 
             current_model_predictions += coefficients[-1] * models[-1].predict(x)
 
-            print >>sys.stderr, "Sklearn tree step: %d, mean squared error: %f" % (i, mean_squared_error(current_model_predictions, y))
-            # print >>sys.stderr, current_model_predictions
+            if self.debug:
+                print >>sys.stderr, "My tree step: %d, mean squared error: %f" % (i, mean_squared_error(current_model_predictions, y))
+                # print >>sys.stderr, current_model_predictions
 
         self.models = models
         self.coefficients = coefficients

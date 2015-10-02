@@ -17,7 +17,7 @@ class DecisionTreeRegressor():
         def __init__(self):
             pass
 
-    def __init__(self, max_depth=50, min_list_size=2, min_list_variance=1e-10):
+    def __init__(self, max_depth=50, min_list_size=3, min_list_variance=1e-10):
         """
         :param max_depth: maximum depth of the tree
         :param min_list_size: minimum list size for continuation splitting
@@ -25,7 +25,7 @@ class DecisionTreeRegressor():
         :return: None
         """
         self.max_depth = max_depth
-        self.min_list_size = min_list_size
+        self.min_list_size = max(min_list_size, 3)
         self.root = None
         self.count_features = None
         self.train_set_size = None
