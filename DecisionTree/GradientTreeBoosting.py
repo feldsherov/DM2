@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 from sklearn.metrics import mean_squared_error
-from sklearn.tree import  DecisionTreeRegressor as SklearnDecisionTreeRegressor
+from sklearn.tree import DecisionTreeRegressor as SklearnDecisionTreeRegressor
 
 from DecisionTreeRegressor import DecisionTreeRegressor
 
@@ -40,8 +40,9 @@ class GradientTreeBoosting:
         coefficients.append(self.step)
 
         current_model_predictions = coefficients[-1] * models[-1].predict(x)
+        print >>sys.stderr, "My tree step: %d, mean squared error: %f" % (0, mean_squared_error(current_model_predictions, y))
 
-        for i in range(self.count_steps):
+        for i in range(1, self.count_steps):
             antigrad = 2*(y - current_model_predictions)
             models.append(DecisionTreeRegressor(max_depth=self.max_tree_depth))
             models[-1].fit(x, antigrad)
@@ -49,7 +50,8 @@ class GradientTreeBoosting:
 
             current_model_predictions += coefficients[-1] * models[-1].predict(x)
 
-            print >>sys.stderr, "Step: %d, mean squared error: %f" % (i, mean_squared_error(current_model_predictions, y))
+            print >>sys.stderr, "My tree step: %d, mean squared error: %f" % (i, mean_squared_error(current_model_predictions, y))
+            # print >>sys.stderr, current_model_predictions
 
         self.models = models
         self.coefficients = coefficients
@@ -99,8 +101,9 @@ class GradientTreeBoostingViaSklearnTree:
         coefficients.append(self.step)
 
         current_model_predictions = coefficients[-1] * models[-1].predict(x)
+        print >>sys.stderr, "Sklearn tree step: %d, mean squared error: %f" % (0, mean_squared_error(current_model_predictions, y))
 
-        for i in range(self.count_steps):
+        for i in range(1, self.count_steps):
             antigrad = 2*(y - current_model_predictions)
             models.append(SklearnDecisionTreeRegressor(max_depth=self.max_tree_depth))
             models[-1].fit(x, antigrad)
@@ -108,7 +111,8 @@ class GradientTreeBoostingViaSklearnTree:
 
             current_model_predictions += coefficients[-1] * models[-1].predict(x)
 
-            print >>sys.stderr, "Step: %d, mean squared error: %f" % (i, mean_squared_error(current_model_predictions, y))
+            print >>sys.stderr, "Sklearn tree step: %d, mean squared error: %f" % (i, mean_squared_error(current_model_predictions, y))
+            # print >>sys.stderr, current_model_predictions
 
         self.models = models
         self.coefficients = coefficients

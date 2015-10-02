@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 
 __author__ = 'Svyatoslav Feldsherov'
 
@@ -16,7 +17,7 @@ class DecisionTreeRegressor():
         def __init__(self):
             pass
 
-    def __init__(self, max_depth=10, min_list_size=2, min_list_variance=1e-2):
+    def __init__(self, max_depth=50, min_list_size=2, min_list_variance=1e-10):
         """
         :param max_depth: maximum depth of the tree
         :param min_list_size: minimum list size for continuation splitting
@@ -29,6 +30,25 @@ class DecisionTreeRegressor():
         self.count_features = None
         self.train_set_size = None
         self.min_list_variance = min_list_variance
+
+    def __visualize_rec(self, root, depth):
+        """
+        print ro stderr tree
+        :param root: root of current subtree
+        :param depth:
+        :return:
+        """
+
+        if "left" not in root.__dict__ and "right" not in root.__dict__:
+            print >>sys.stderr, "    "*depth, "list_result=%s" % root.list_result
+            return
+
+        self.__visualize_rec(root.left, depth+1)
+        print >>sys.stderr, "    "*depth, "id=%s split_el=%s" % (root.feature_id, root.split_el)
+        self.__visualize_rec(root.right, depth+1)
+
+    def visualize(self):
+        self.__visualize_rec(self.root, 0)
 
     def __train_tree(self, root, x, y, curr_depth=0):
         """
@@ -47,13 +67,14 @@ class DecisionTreeRegressor():
             return
 
         # finding optimal split
-        feature_id, predicate = self.__get_optimal_split(x, y)
+        feature_id, predicate, split_el = self.__get_optimal_split(x, y)
 
         # initialization of current node
         root.left = DecisionTreeRegressor.DecisionTreeNode()
         root.right = DecisionTreeRegressor.DecisionTreeNode()
         root.predicate = predicate
         root.feature_id = feature_id
+        root.split_el = split_el
 
         # boolean array: is object belong to left child
         actual_objects_left = np.array([predicate(el) for el in x[::, feature_id]])
@@ -84,10 +105,11 @@ class DecisionTreeRegressor():
         return np.array([self.__get_one_prediction(self.root, elem) for elem in x])
 
     def get_features_profit(self, x, y):
-        profit = np.zeros(y.size())
-        self.__get_feature_profit_by_node(x, y, profit)
+        x = np.array(x)
+        y = np.array(y)
+        profit = np.zeros(x.shape[1])
+        self.__get_feature_profit_by_node(self.root, x, y, profit)
         return profit
-
 
     def __get_feature_profit_by_node(self, root, x, y, profit):
         """
@@ -110,12 +132,11 @@ class DecisionTreeRegressor():
         actual_left = y[actual_objects_left]
         actual_right = y[-actual_objects_left]
 
-        profit[feature_id] += y.var() / y.size() -\
-                              actual_left.var() / actual_left.size() - actual_right.var() / actual_right.size()
+        profit[feature_id] += y.var() * y.size -\
+                              actual_left.var() * actual_left.size - actual_right.var() * actual_right.size
 
         self.__get_feature_profit_by_node(root.left, x[actual_objects_left], actual_left, profit)
         self.__get_feature_profit_by_node(root.right, x[-actual_objects_left], actual_right, profit)
-
 
     def __get_one_prediction(self, root, elem):
         """
@@ -173,5 +194,9 @@ class DecisionTreeRegressor():
                         x[sort_order[elem_id][feature_id]][feature_id] and current_variance < loss:
                     optimal_feature_id, optimal_elem_id, loss = feature_id, elem_id, current_variance
 
+        pred_split_val = x[sort_order[optimal_elem_id - 1][optimal_feature_id]][optimal_feature_id]
+        next_split_val = x[sort_order[optimal_elem_id + 1][optimal_feature_id]][optimal_feature_id]
+        act_split_val = (pred_split_val + next_split_val) / 2
         return (optimal_feature_id,
-                lambda a: a < x[sort_order[optimal_elem_id][optimal_feature_id]][optimal_feature_id])
+                lambda a: a <= act_split_val,
+                act_split_val)
