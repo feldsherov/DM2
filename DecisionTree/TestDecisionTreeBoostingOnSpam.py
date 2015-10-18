@@ -21,10 +21,10 @@ def main():
 
     train_x, train_y = data[::, 1::], data[::, 0]
 
-    ensemble = GradientTreeBoosting(count_steps=20, max_tree_depth=3, step=1e-1)
+    ensemble = GradientTreeBoosting(count_steps=200, max_tree_depth=3, step=1e-2, debug=True)
     ensemble.fit(train_x, train_y)
 
-    ensemble_with_sktree = GradientTreeBoostingViaSklearnTree(count_steps=20, max_tree_depth=3, step=1e-1)
+    ensemble_with_sktree = GradientTreeBoostingViaSklearnTree(count_steps=200, max_tree_depth=3, step=1e-2, debug=True)
     ensemble_with_sktree.fit(train_x, train_y)
 
     # for tree in ensemble.models:
@@ -39,7 +39,7 @@ def main():
     sktree = sklearn_trees.DecisionTreeRegressor()
     sktree.fit(train_x, train_y)
 
-    skensemble = GradientBoostingRegressor(n_estimators=20, max_depth=3)
+    skensemble = GradientBoostingRegressor(n_estimators=200, max_depth=3)
     skensemble.fit(train_x, train_y)
 
 
